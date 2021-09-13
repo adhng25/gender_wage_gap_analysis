@@ -1,0 +1,73 @@
+---
+title: "STAT 140 Project" ## Change the title weekly according to the HW assignment number. 
+author: "Hong Anh Nguyen" ## Change to your name. Use quotes! Also, put your collaboraters in parentheses. 
+date: "`r format(Sys.Date(), '%m/%d/%Y')`" ## No need to change the date! This R command prints it out automatically.  
+output: word_document ## Keep this as an html document, for now. 
+---
+
+```{r include = FALSE}   
+knitr::opts_chunk$set(   # This is for later! Don't worry about it now. 
+  echo = TRUE,           # Don't show code.
+  warning = FALSE,       # Don't show warnings.
+  message = FALSE,       # Don't show messages (less serious warnings).
+  cache = FALSE,         # Set to TRUE to save results from last compilation.
+  fig.align = "center"   # Center figures.
+)
+library(tidyverse)       # Load libraries you always use here.
+library(tidymodels)
+library(ggplot2)
+library(kableExtra)
+library(dplyr)
+
+#set.seed(27)             # Make random results reproducible
+```
+
+```{r cars}
+prof_salary <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv") 
+```
+  
+* Categorical variable: discipline - a factor with levels A (“theoretical” departments) or B (“applied” departments).
+
+a.
+```{r}
+ggplot(data = prof_salary, aes(x = yrs.service, y = salary, color = as.factor(discipline))) +
+  geom_point() 
+```
+
+* The pattern of observations for A (“theoretical” departments) is a weak-moderate relationship that has some unusual values at the top of the graph. A linear model may not fit this graph.
+* The pattern of observations for B (“applied” departments) is a fairly strong positive linear relationship that has some unusual values at the right bottom of the graph.
+
+b. 
+```{r, echo = F}
+salary_model <- lm(data = prof_salary, salary ~ yrs.service + discipline)
+summary(salary_model)$adj.r.squared
+```
+
+* 15.362% of the variation in the estimated academic salary can be explained by the number of years of service and the discipline.
+* The adjusted R^2 is pretty low, which is consistent with the description of the scatterplot in part (a).
+
+c.
+```{r, echo = F}
+salary_model <- lm(data = prof_salary, salary ~ yrs.service + discipline)
+round(summary(salary_model)$coefficients, 3)
+```
+
+* On average, the salary for professors in a college in the U.S with discipline A ( (“theoretical” departments) is approximately $91335.832.
+* For every professor in discipline B (“applied” departments), the expected salary will increase by about $13184.043.
+
+d.
+```{r, echo = F}
+slope <- 13184.043
+se_slope <- 2846.831
+tstar <- qt(0.975, df = salary_model$df.residual)
+```
+
+```{r, echo = F}
+slope - tstar*se_slope
+slope + tstar*se_slope
+```
+
+* We are 95% confident that the slope for predicting the salary of professors from their discipline is between 7587.164 and 18780.92.
+* Since this confidence interval does not contain 0, there is some evidence that there is a true, positive relationship between professors' salary and their discipline. 
+
+

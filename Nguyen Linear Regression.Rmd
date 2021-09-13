@@ -1,0 +1,121 @@
+---
+title: "STAT 140 Project" ## Change the title weekly according to the HW assignment number. 
+author: "Hong Anh Nguyen" ## Change to your name. Use quotes! Also, put your collaboraters in parentheses. 
+date: "`r format(Sys.Date(), '%m/%d/%Y')`" ## No need to change the date! This R command prints it out automatically.  
+output: word_document ## Keep this as an html document, for now. 
+---
+
+```{r include = FALSE}   
+knitr::opts_chunk$set(   # This is for later! Don't worry about it now. 
+  echo = TRUE,           # Don't show code.
+  warning = FALSE,       # Don't show warnings.
+  message = FALSE,       # Don't show messages (less serious warnings).
+  cache = FALSE,         # Set to TRUE to save results from last compilation.
+  fig.align = "center"   # Center figures.
+)
+library(tidyverse)       # Load libraries you always use here.
+library(tidymodels)
+library(ggplot2)
+
+#set.seed(27)             # Make random results reproducible
+```
+
+```{r, echo = F}
+prof_salary <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv") 
+```
+
+* Let x, the predictor variable, be yrs.service, the professors' number of years of service in the college.
+* Let y, the response variable, be salary, the nine-month salary, in dollars.
+
+1.  
+```{r}
+ggplot(data = prof_salary, aes(x = yrs.service, y = salary)) +
+  geom_point() + 
+  geom_smooth(method = "lm", se = F)
+```
+  
+* Comment: The relationship between years of service and salary is a moderate, postive linear relationship. There are a few potential outliers (around 8 years with $200,000, and some points to the right of the cloud of points).
+
+2. 
+```{r, echo = F}
+r <- cor(prof_salary$yrs.service, prof_salary$salary)
+r
+r^2
+```
+
+* The value of the correlation is 0.335, which is consistent with the graph (a weak/moderate relationship).
+
+3. 
+* The squared correlation is 0.112.
+* This shows that 11.2% of the variation in salary is explained by the variation in the number of years of service.
+
+4.
+```{r, echo = F}
+profSalary_model <- lm(salary ~ yrs.service, data = prof_salary)
+summary(profSalary_model)$coefficients
+```
+
+* The intercept shows that, a professor who has 0 years of service will have a salary of $99974.6529.
+* The slope indicates that for every year of service a professor has, the salalry will rise by $779.5691.
+
+5. 
+```{r, echo = F}
+slope <- 779.5691
+se_slope <- 110.4169
+tstar <- qt(0.975, df = profSalary_model$df.residual)
+slope - tstar*se_slope
+slope + tstar*se_slope
+```
+
+* We are 95% confident that the slope for predicting the professors' salary from the years of service is between 562.49 and 996.65. There is some evidence that there is a true, positive relationship between years of service and salary.
+
+```{r, echo = F}
+intercept <- 99974.6529
+intercept_slope <- 2416.6053
+tstar <- qt(0.975, df = profSalary_model$df.residual)
+intercept - tstar*intercept_slope
+intercept + tstar*intercept_slope
+```
+
+* We are 95% confident that the intercept for predicting the professors' salary from the years of service is between 95223.64 and 104725.7.
+
+6. 
+* Linearity:
+```{r, echo = F}
+prof_salary$yrs.service_new <- (prof_salary$yrs.service - mean(prof_salary$yrs.service))^2
+
+profSalary_model <- lm(salary ~ yrs.service + yrs.service_new, data = prof_salary)
+
+prof_salary$predicted <- profSalary_model$fitted.values
+prof_salary$residuals <- profSalary_model$residuals
+
+
+ggplot(data = prof_salary, aes(x = predicted, y = residuals)) +
+  geom_point() + 
+  xlab("Predicted") +
+  ylab("Residuals") +
+  geom_smooth(se = FALSE) 
+```
+
+* A linear model might not fit in this data - there are lots of negative values for very large values of years of service, and lots of positive values for values of years of service near the middle.
+
+```{r, echo = F}
+ggplot(data = prof_salary, aes(x = residuals)) +
+  geom_histogram(bins = 20) + 
+  xlab("Residuals") + 
+  ylab("")
+```
+
+* The histogram is nearly normal and centered at approximately 0. Residuals range from -75000 to 120000. There appears to be some outliers near the right tail of the graph.
+
+7.
+* The points far from the cloud of points, but not horizontally far. Therefore, the graph does not have high leverage and thus, does not appear to strongly affected the line.
+
+
+
+
+
+
+
+  
+  

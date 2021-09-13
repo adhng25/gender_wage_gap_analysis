@@ -1,0 +1,39 @@
+---
+title: "STAT 140 Project" ## Change the title weekly according to the HW assignment number. 
+author: "Hong Anh Nguyen" ## Change to your name. Use quotes! Also, put your collaboraters in parentheses. 
+date: "`r format(Sys.Date(), '%m/%d/%Y')`" ## No need to change the date! This R command prints it out automatically.  
+output: html_document ## Keep this as an html document, for now. 
+---
+
+```{r include = FALSE}   
+knitr::opts_chunk$set(   # This is for later! Don't worry about it now. 
+  echo = TRUE,           # Don't show code.
+  warning = FALSE,       # Don't show warnings.
+  message = FALSE,       # Don't show messages (less serious warnings).
+  cache = FALSE,         # Set to TRUE to save results from last compilation.
+  fig.align = "center"   # Center figures.
+)
+library(tidyverse)       # Load libraries you always use here.
+library(tidymodels)
+library(ggplot2)
+
+#set.seed(27)             # Make random results reproducible
+```
+
+```{r, echo = F}
+prof_salary <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv") 
+summary(prof_salary)
+```
+
+* Comment: 
+  * The data shows the 2008-09 nine-month academic salary for Assistant Professors, Associate Professors, and Professors in a college in the U.S. This dataset has 397 rows and 6 columns, which includes 3 categorical variables and 3 numerical variables. The response variable in this dataset is salary.
+  * The categorical variables are rank, discipline, and sex. Rank is a factor with different levels of Assistant Professors, Associate Professors, and Professors. Discipline is a factor with levels A and B, referring to theoretical departments and applied departments, respectively. Sex is a factor with levels of Female and Male.
+  * The numerical variables include years since PhD., years of service, and salary. Salary covers a nine-month salary in dollars.
+
+* References:
+Fox J. and Weisberg, S. (2011) An R Companion to Applied Regression, Second Edition Sage.
+https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv
+
+
+
+

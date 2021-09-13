@@ -1,0 +1,127 @@
+---
+title: "STAT 140 Project" ## Change the title weekly according to the HW assignment number. 
+author: "Hong Anh Nguyen" ## Change to your name. Use quotes! Also, put your collaboraters in parentheses. 
+date: "`r format(Sys.Date(), '%m/%d/%Y')`" ## No need to change the date! This R command prints it out automatically.  
+output: word_document ## Keep this as an html document, for now. 
+---
+
+```{r include = FALSE}   
+knitr::opts_chunk$set(   # This is for later! Don't worry about it now. 
+  echo = TRUE,           # Don't show code.
+  warning = FALSE,       # Don't show warnings.
+  message = FALSE,       # Don't show messages (less serious warnings).
+  cache = FALSE,         # Set to TRUE to save results from last compilation.
+  fig.align = "center"   # Center figures.
+)
+library(tidyverse)       # Load libraries you always use here.
+library(tidymodels)
+library(ggplot2)
+library(kableExtra)
+library(dplyr)
+
+#set.seed(27)             # Make random results reproducible
+```
+
+```{r, echo = F}
+prof_salary <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv") 
+```
+
+1. 
+```{r, echo = F}
+full_model <- lm(data = prof_salary, salary ~ rank + discipline + 
+                   yrs.since.phd + yrs.service + sex)
+round(summary(full_model)$coefficients, 3)
+```
+
+2.
+* I construct a multiple linear regression model with all of the variables in my dataset. There are five explanatory variables in this model, in which three of them are categorical variables, and the remaining two are numerical variables. The professors' rank and discipline are the most significant predictors, while the gender is the least significant predictor.
+
+```{r, echo = F}
+model1 <- lm(data = prof_salary, salary ~ rank + discipline + yrs.since.phd + yrs.service)
+round(summary(model1)$coefficients, 3)
+summary(model1)$adj.r.squared
+```
+
+* Using backward elimination with the p-value approach, I drop the predictor that has α, the significance level, over 0.05 and refit the model. Thus, I have a final, reduced model for the dataset that contains the professors' rank, discipline, number of years since PhD and number of years of service. Furthermore, the adjusted R squared value is approximately 44.553%, pretty high for predicting salary.
+
+3. 
+```{r, echo = F}
+salary_residuals <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv")
+salary_residuals$Predicted <- model1$fitted.values
+salary_residuals$Residuals <- model1$residuals
+
+ggplot(data = salary_residuals, aes(x = Predicted, y = log(Residuals))) +
+  geom_point() + 
+  xlab("Predicted") +
+  ylab("Residuals")
+```
+
+* I will check assumptions for my final, reduced model. To begin, we observe if the data has a linear trend using a residual plot. The residual plot above shows that there are slightly less values when the variables for in the reduced model have very high and very low values. However, the values are roughly distributed evenly. Thus, the association seems roughly linear and we proceed with caution. The association seems to be neither positive nor negative. It is rather observed to be a flat line. As the points are roughly spread out, they can be described as having a moderate relationship. There does not seems to be any significant outliers.
+
+* Checking the conditions, show that the multiple linear model is the best model for this data. For linearity, the residuals vs fitted graph shows a linear relationship with no distinct form (Figure 14), so the model satisfies the linearity condition. 
+
+* A plot of the absolute value of the residuals against their corresponding fitted values (yˆ ) is shown in Figure 9.17. We don’t see any i
+obvious deviations from constant variance in this example.
+
+```{r, echo = F}
+ggplot(data = salary_residuals, aes(x = Residuals)) +
+  geom_histogram(bins = 20) + 
+  xlab("Residuals") + 
+  ylab("")
+```
+
+* The residual histogram plot shows a slightly left skewed, unimodal, and approximately normal distribution centered at 0. The residuals range from -7.5 to about 3 (Figure 13). Since the residuals appear to be nearly normal, the model satisfies the nearly normal residuals condition. 
+
+* Moreover, we must check if the residuals are nearly normal. This condition can be checked with a histogram. The histogram above on the residuals is nearly normal and centered at approximately 0. Residuals range from approximately -1.1 to 0.9. There do not appear to be any outliers.
+
+```{r, echo = F}
+salary_residuals <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/carData/Salaries.csv")
+salary_residuals$Predicted <- model1$fitted.values
+salary_residuals$Residuals <- model1$residuals
+
+ggplot(data = salary_residuals, aes(x = rank, y = log(Residuals))) +
+  geom_boxplot() 
+
+ggplot(data = salary_residuals, aes(x = discipline, y = log(Residuals))) +
+  geom_boxplot() 
+
+ggplot(data = salary_residuals, aes(x = yrs.service, y = log(Residuals))) +
+  geom_point() + 
+  xlab("Service Year") +
+  ylab("Residuals")
+
+ggplot(data = salary_residuals, aes(x = yrs.since.phd, y = log(Residuals))) +
+  geom_point() + 
+  xlab("PhD Year") +
+  ylab("Residuals")
+```
+
+* In terms of constant variability, the variability of points around the least squares line remains roughly constant so the condition is not held a problem. The condition for independent observation also does not become a problem as there are no variables in the model that are related to time.
+
+* Constant variability is checked with the residuals scatterplot, the model satisfies this condition because the variability of residuals around the least squares line is roughly constant. Generally, in this scatterplot of residuals, there is not a great amount of variability of y when x is large (Figure 15). Observations are still independent as well, which shows that the multiple regression model is the best model for this data. 
+
+
+```{r, echo = F}
+model_rank <- lm(data = prof_salary, salary ~ rank)
+summary(model_rank)$adj.r.squared
+
+model_disc <- lm(data = prof_salary, salary ~ discipline)
+summary(model_disc)$adj.r.squared
+
+model_serv <- lm(data = prof_salary, salary ~ yrs.service)
+summary(model_serv)$adj.r.squared
+
+model_phd <- lm(data = prof_salary, salary ~ yrs.since.phd)
+summary(model_phd)$adj.r.squared
+```
+
+
+
+* The final model shows that site has the lowest R2 by far (R2 = 0.059) yet the total R2 of the model decreases without site in the model. Tail length has a total R2 value of 0.313, and head length has the highest R2 value of 0.473. However, site, tail length, and head length have very small p-values. 
+
+* Through the final model, we can see that high school GPA, number of credits in humanitiy courses, and whether the student is White are the most significant predictors of first year college GPA. All three of these predictors positively impact the response variable and interpretations of their coeffcients make sense within the model’s context. A high high school GPA, more credits in humanitiy courses during high school, and being White are all variables that can have a positive effect on first year college GPA- having such effect is not bizarre.
+
+
+
+
+
